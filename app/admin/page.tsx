@@ -261,11 +261,11 @@ export default function AdminPage() {
                           resource.difficulty === 'INTERMEDIATE' ? 'bg-yellow-100 text-yellow-700' :
                           'bg-red-100 text-red-700'
                         }`}>
-                          {difficultyLabels[resource.difficulty]}
+                          {difficultyLabels[resource.difficulty as Difficulty]}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
-                        {sourceTypeLabels[resource.sourceType]}
+                        {sourceTypeLabels[resource.sourceType as SourceType]}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
