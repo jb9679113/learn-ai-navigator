@@ -4,10 +4,14 @@ import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import ResourceForm from '@/components/ResourceForm'
 import CategoryForm from '@/components/CategoryForm'
-import type { Resource, Category } from '@prisma/client'
+import type { Resource, Category as PrismaCategory } from '@prisma/client'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 type SourceType = 'GITHUB' | 'WEBSITE' | 'DOCUMENT' | 'OTHER'
+
+interface Category extends PrismaCategory {
+  children?: Category[]
+}
 
 const difficultyLabels: Record<Difficulty, string> = {
   BEGINNER: '入门',
