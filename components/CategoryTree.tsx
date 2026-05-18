@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import type { Category } from '@prisma/client'
+
+interface Category {
+  id: string
+  name: string
+  parentId: string | null
+  children?: Category[]
+}
 
 interface CategoryTreeProps {
   categories: Category[]
   selectedId: string | null
   onSelect: (id: string | null) => void
   showAll?: boolean
-}
-
-interface CategoryWithChildren extends Category {
-  children?: CategoryWithChildren[]
 }
 
 export default function CategoryTree({ categories, selectedId, onSelect, showAll = false }: CategoryTreeProps) {
@@ -25,7 +27,7 @@ export default function CategoryTree({ categories, selectedId, onSelect, showAll
     setExpandedIds(newExpanded)
   }
 
-  const renderTree = (items: CategoryWithChildren[], depth = 0) => {
+  const renderTree = (items: Category[], depth = 0) => {
     return items.map((item) => (
       <li key={item.id} className="mb-1">
         <div
@@ -72,7 +74,7 @@ export default function CategoryTree({ categories, selectedId, onSelect, showAll
           <span>全部资源</span>
         </div>
       )}
-      <ul className="mt-1">{renderTree(categories as CategoryWithChildren[])}</ul>
+      <ul className="mt-1">{renderTree(categories)}</ul>
     </div>
   )
 }

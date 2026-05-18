@@ -6,13 +6,30 @@ import CategoryTree from '@/components/CategoryTree'
 import SearchFilter from '@/components/SearchFilter'
 import ResourceCard from '@/components/ResourceCard'
 import ResourceModal from '@/components/ResourceModal'
-import type { Resource, Category } from '@prisma/client'
+import type { Resource } from '@prisma/client'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
 type SourceType = 'GITHUB' | 'WEBSITE' | 'DOCUMENT' | 'OTHER'
 
+interface Category {
+  id: string
+  name: string
+  parentId: string | null
+  children?: Category[]
+}
+
 interface ResourceWithCategory extends Resource {
   category?: { name: string }
+}
+
+function parseTags(tags: string | string[]): string[] {
+  if (!tags) return []
+  if (Array.isArray(tags)) return tags
+  try {
+    return JSON.parse(tags)
+  } catch {
+    return tags.split(',').map(t => t.trim()).filter(t => t)
+  }
 }
 
 export default function ResourcesPage() {
@@ -26,7 +43,7 @@ export default function ResourcesPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
 
-  const availableTags = Array.from(new Set(resources.flatMap(r => r.tags)))
+  const availableTags = Array.from(new Set(resources.flatMap(r => parseTags(r.tags))))
 
   useEffect(() => {
     fetchCategories()

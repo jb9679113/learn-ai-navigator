@@ -27,8 +27,18 @@ const sourceTypeIcons: Record<SourceType, string> = {
   OTHER: '📦',
 }
 
+function parseTags(tags: string | string[]): string[] {
+  if (!tags) return []
+  if (Array.isArray(tags)) return tags
+  try {
+    return JSON.parse(tags)
+  } catch {
+    return tags.split(',').map(t => t.trim()).filter(t => t)
+  }
+}
+
 export default function ResourceCard({ resource, onClick }: ResourceCardProps) {
-  const tags = typeof resource.tags === 'string' ? JSON.parse(resource.tags) : resource.tags
+  const tags = parseTags(resource.tags)
   const difficulty = resource.difficulty as Difficulty
   const sourceType = resource.sourceType as SourceType
 

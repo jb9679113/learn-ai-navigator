@@ -11,6 +11,16 @@ interface ResourceWithCategory extends Resource {
   category?: { name: string }
 }
 
+function parseTags(tags: string | string[]): string[] {
+  if (!tags) return []
+  if (Array.isArray(tags)) return tags
+  try {
+    return JSON.parse(tags)
+  } catch {
+    return tags.split(',').map(t => t.trim()).filter(t => t)
+  }
+}
+
 const difficultyColors: Record<Difficulty, string> = {
   BEGINNER: 'bg-green-100 text-green-700',
   INTERMEDIATE: 'bg-yellow-100 text-yellow-700',
@@ -84,7 +94,7 @@ export default function ResourceDetailPage({ params }: { params: { id: string } 
     )
   }
 
-  const tags = typeof resource.tags === 'string' ? JSON.parse(resource.tags) : resource.tags
+  const tags = parseTags(resource.tags)
   const difficulty = resource.difficulty as Difficulty
   const sourceType = resource.sourceType as SourceType
 
