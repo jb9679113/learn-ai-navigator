@@ -1,4 +1,5 @@
-import type { Difficulty, SourceType } from '@prisma/client'
+type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+type SourceType = 'GITHUB' | 'WEBSITE' | 'DOCUMENT' | 'OTHER'
 
 interface SearchFilterProps {
   search: string

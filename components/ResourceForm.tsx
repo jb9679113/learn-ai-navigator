@@ -53,15 +53,16 @@ export default function ResourceForm({ categories, resource, onSubmit, onCancel 
 
   useEffect(() => {
     if (resource) {
+      const tags = typeof resource.tags === 'string' ? JSON.parse(resource.tags) : resource.tags
       setFormData({
         name: resource.name,
         url: resource.url,
         description: resource.description || '',
         categoryId: resource.categoryId,
-        tags: resource.tags.join(','),
-        difficulty: resource.difficulty,
+        tags: tags.join(','),
+        difficulty: resource.difficulty as Difficulty,
         rating: resource.rating,
-        sourceType: resource.sourceType,
+        sourceType: resource.sourceType as SourceType,
         myNotes: resource.myNotes || '',
         isPublished: resource.isPublished,
       })

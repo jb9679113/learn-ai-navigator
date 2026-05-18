@@ -4,23 +4,26 @@ import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import type { Resource } from '@prisma/client'
 
+type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+type SourceType = 'GITHUB' | 'WEBSITE' | 'DOCUMENT' | 'OTHER'
+
 interface ResourceWithCategory extends Resource {
   category?: { name: string }
 }
 
-const difficultyColors = {
+const difficultyColors: Record<Difficulty, string> = {
   BEGINNER: 'bg-green-100 text-green-700',
   INTERMEDIATE: 'bg-yellow-100 text-yellow-700',
   ADVANCED: 'bg-red-100 text-red-700',
 }
 
-const difficultyLabels = {
+const difficultyLabels: Record<Difficulty, string> = {
   BEGINNER: '入门',
   INTERMEDIATE: '中级',
   ADVANCED: '高级',
 }
 
-const sourceTypeLabels: Record<string, string> = {
+const sourceTypeLabels: Record<SourceType, string> = {
   GITHUB: 'GitHub',
   WEBSITE: '网站',
   DOCUMENT: '文档',
@@ -81,6 +84,10 @@ export default function ResourceDetailPage({ params }: { params: { id: string } 
     )
   }
 
+  const tags = typeof resource.tags === 'string' ? JSON.parse(resource.tags) : resource.tags
+  const difficulty = resource.difficulty as Difficulty
+  const sourceType = resource.sourceType as SourceType
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('admin'); setIsAdmin(false) }} />
@@ -94,15 +101,15 @@ export default function ResourceDetailPage({ params }: { params: { id: string } 
                 {resource.category?.name || '未分类'}
               </span>
               <span className={`px-3 py-1 rounded-full text-sm font-medium bg-white/20`}>
-                {sourceTypeLabels[resource.sourceType]}
+                {sourceTypeLabels[sourceType]}
               </span>
             </div>
           </div>
           
           <div className="p-6">
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${difficultyColors[resource.difficulty]}`}>
-                {difficultyLabels[resource.difficulty]}
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${difficultyColors[difficulty]}`}>
+                {difficultyLabels[difficulty]}
               </span>
               <div className="flex items-center gap-1 text-yellow-500">
                 {'★'.repeat(Math.min(resource.rating, 5))}
@@ -126,7 +133,7 @@ export default function ResourceDetailPage({ params }: { params: { id: string } 
             </div>
             
             <div className="flex flex-wrap gap-2 mb-6">
-              {resource.tags.map((tag) => (
+              {tags.map((tag: string) => (
                 <span
                   key={tag}
                   className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full"

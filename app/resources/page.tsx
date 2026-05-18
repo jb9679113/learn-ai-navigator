@@ -26,7 +26,7 @@ export default function ResourcesPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
 
-  const availableTags = [...new Set(resources.flatMap(r => r.tags))]
+  const availableTags = Array.from(new Set(resources.flatMap(r => r.tags)))
 
   useEffect(() => {
     fetchCategories()

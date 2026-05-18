@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import type { Resource } from '@prisma/client'
 
+type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+type SourceType = 'GITHUB' | 'WEBSITE' | 'DOCUMENT' | 'OTHER'
+
 interface ResourceModalProps {
   resource: Resource & { category?: { name: string } }
   isAdmin: boolean
@@ -8,19 +11,19 @@ interface ResourceModalProps {
   onUpdateNotes: (notes: string) => void
 }
 
-const difficultyColors = {
+const difficultyColors: Record<Difficulty, string> = {
   BEGINNER: 'bg-green-100 text-green-700',
   INTERMEDIATE: 'bg-yellow-100 text-yellow-700',
   ADVANCED: 'bg-red-100 text-red-700',
 }
 
-const difficultyLabels = {
+const difficultyLabels: Record<Difficulty, string> = {
   BEGINNER: '入门',
   INTERMEDIATE: '中级',
   ADVANCED: '高级',
 }
 
-const sourceTypeLabels: Record<string, string> = {
+const sourceTypeLabels: Record<SourceType, string> = {
   GITHUB: 'GitHub',
   WEBSITE: '网站',
   DOCUMENT: '文档',
@@ -30,6 +33,10 @@ const sourceTypeLabels: Record<string, string> = {
 export default function ResourceModal({ resource, isAdmin, onClose, onUpdateNotes }: ResourceModalProps) {
   const [notes, setNotes] = useState(resource.myNotes || '')
   const [isEditing, setIsEditing] = useState(false)
+
+  const tags = typeof resource.tags === 'string' ? JSON.parse(resource.tags) : resource.tags
+  const difficulty = resource.difficulty as Difficulty
+  const sourceType = resource.sourceType as SourceType
 
   const handleSaveNotes = async () => {
     await onUpdateNotes(notes)
@@ -51,14 +58,14 @@ export default function ResourceModal({ resource, isAdmin, onClose, onUpdateNote
         
         <div className="p-6">
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${difficultyColors[resource.difficulty]}`}>
-              {difficultyLabels[resource.difficulty]}
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${difficultyColors[difficulty]}`}>
+              {difficultyLabels[difficulty]}
             </span>
             <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
               {resource.category?.name || '未分类'}
             </span>
             <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-              {sourceTypeLabels[resource.sourceType]}
+              {sourceTypeLabels[sourceType]}
             </span>
           </div>
           
@@ -78,7 +85,7 @@ export default function ResourceModal({ resource, isAdmin, onClose, onUpdateNote
           </div>
           
           <div className="flex flex-wrap gap-2 mb-6">
-            {resource.tags.map((tag) => (
+            {tags.map((tag: string) => (
               <span
                 key={tag}
                 className="px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded-full"
