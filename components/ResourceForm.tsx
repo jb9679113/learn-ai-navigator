@@ -73,7 +73,7 @@ export default function ResourceForm({ categories, resource, onSubmit, onCancel 
     e.preventDefault()
     onSubmit({
       ...formData,
-      tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
+      tags: JSON.stringify(formData.tags.split(',').map(t => t.trim()).filter(t => t)),
       rating: Number(formData.rating),
     })
   }
