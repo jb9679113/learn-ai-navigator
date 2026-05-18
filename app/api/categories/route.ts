@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import type { Category } from '@prisma/client'
+
+interface CategoryWithChildren extends Category {
+  children: CategoryWithChildren[]
+}
 
 export async function GET(request: Request) {
   try {
@@ -8,7 +13,7 @@ export async function GET(request: Request) {
       orderBy: { order: 'asc' },
     })
 
-    const buildTree = (parentId: string | null) => {
+    const buildTree = (parentId: string | null): CategoryWithChildren[] => {
       return categories
         .filter(cat => cat.parentId === parentId)
         .map(cat => ({
