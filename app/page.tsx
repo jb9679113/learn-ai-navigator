@@ -5,7 +5,14 @@ import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import ResourceCard from '@/components/ResourceCard'
 import ResourceModal from '@/components/ResourceModal'
-import type { Resource, Category } from '@prisma/client'
+import type { Resource } from '@prisma/client'
+
+interface Category {
+  id: string
+  name: string
+  parentId: string | null
+  children?: Category[]
+}
 
 interface ResourceWithCategory extends Resource {
   category?: { name: string }
@@ -17,31 +24,54 @@ export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [latestResources, setLatestResources] = useState<ResourceWithCategory[]>([])
   const [topResources, setTopResources] = useState<ResourceWithCategory[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setIsAdmin(localStorage.getItem('admin') === 'true')
+    try {
+      setIsAdmin(localStorage.getItem('admin') === 'true')
+    } catch (e) {
+      // localStorage 在服务端不可用，忽略
+    }
     fetchCategories()
     fetchLatestResources()
     fetchTopResources()
   }, [])
 
   const fetchCategories = async () => {
-    const res = await fetch('/api/categories')
-    const data = await res.json()
-    setCategories(data)
+    try {
+      const res = await fetch('/api/categories')
+      if (!res.ok) throw new Error('Failed to fetch categories')
+      const data = await res.json()
+      setCategories(data || [])
+    } catch (e) {
+      console.error('Error fetching categories:', e)
+      setCategories([])
+    }
   }
 
   const fetchLatestResources = async () => {
-    const res = await fetch('/api/resources')
-    const data = await res.json()
-    setLatestResources(data.slice(0, 6))
+    try {
+      const res = await fetch('/api/resources')
+      if (!res.ok) throw new Error('Failed to fetch resources')
+      const data = await res.json()
+      setLatestResources((data || []).slice(0, 6))
+    } catch (e) {
+      console.error('Error fetching latest resources:', e)
+      setLatestResources([])
+    }
   }
 
   const fetchTopResources = async () => {
-    const res = await fetch('/api/resources')
-    const data = await res.json()
-    const sorted = data.sort((a: Resource, b: Resource) => b.rating - a.rating).slice(0, 3)
-    setTopResources(sorted)
+    try {
+      const res = await fetch('/api/resources')
+      if (!res.ok) throw new Error('Failed to fetch resources')
+      const data = await res.json()
+      const sorted = (data || []).sort((a: Resource, b: Resource) => (b.rating || 0) - (a.rating || 0)).slice(0, 3)
+      setTopResources(sorted)
+    } catch (e) {
+      console.error('Error fetching top resources:', e)
+      setTopResources([])
+    }
   }
 
   const handleLogout = () => {
