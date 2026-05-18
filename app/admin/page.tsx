@@ -186,10 +186,10 @@ export default function AdminPage() {
   }
 
   const allCategoriesList = categories.flatMap(cat => {
-    const list: { id: string; name: string; parentId: string | null }[] = [{ id: cat.id, name: cat.name, parentId: cat.parentId }]
+    const list: { id: string; name: string; parentId: string | null; order: number }[] = [{ id: cat.id, name: cat.name, parentId: cat.parentId, order: cat.order }]
     const collectChildren = (children: Category[]) => {
       for (const child of children) {
-        list.push({ id: child.id, name: child.name, parentId: child.parentId })
+        list.push({ id: child.id, name: child.name, parentId: child.parentId, order: child.order })
         if (child.children) collectChildren(child.children)
       }
     }
