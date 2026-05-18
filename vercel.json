@@ -1,11 +1,14 @@
 {
   "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
   "functions": {
     "app/api/**/*.ts": {
-      "runtime": "@vercel/node@3.0.1"
+      "maxDuration": 10
     }
   },
   "env": {
-    "POSTGRES_PRISMA_URL": "@postgres-url"
+    "POSTGRES_PRISMA_URL": "@postgres"
   }
 }
