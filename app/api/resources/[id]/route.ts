@@ -1,6 +1,18 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import type { Difficulty, SourceType } from '@prisma/client'
+
+function parseTags(tags: string): string[] {
+  if (!tags) return []
+  try {
+    return JSON.parse(tags)
+  } catch {
+    return tags.split(',').map(t => t.trim()).filter(t => t)
+  }
+}
+
+function serializeTags(tags: string[]): string {
+  return JSON.stringify(tags)
+}
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
@@ -13,7 +25,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
     }
 
-    return NextResponse.json(resource)
+    return NextResponse.json({ ...resource, tags: parseTags(resource.tags) })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch resource' }, { status: 500 })
   }
@@ -30,17 +42,17 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         url,
         description,
         categoryId,
-        tags: tags || [],
-        difficulty: difficulty as Difficulty,
+        tags: serializeTags(tags || []),
+        difficulty: difficulty || 'BEGINNER',
         rating: rating || 0,
-        sourceType: sourceType as SourceType,
+        sourceType: sourceType || 'OTHER',
         myNotes,
         isPublished: isPublished !== undefined ? isPublished : true,
       },
       include: { category: true },
     })
 
-    return NextResponse.json(resource)
+    return NextResponse.json({ ...resource, tags: parseTags(resource.tags) })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update resource' }, { status: 500 })
   }

@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Category {
@@ -20,8 +20,6 @@ model Category {
   resources Resource[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("categories")
 }
 
 model Resource {
@@ -30,29 +28,14 @@ model Resource {
   url         String
   description String?
   categoryId  String
-  tags        String[]
-  difficulty  Difficulty
+  tags        String   @default("")
+  difficulty  String   @default("BEGINNER")
   rating      Int      @default(0)
-  sourceType  SourceType
+  sourceType  String   @default("OTHER")
   myNotes     String?
   isPublished Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@map("resources")
-}
-
-enum Difficulty {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
-
-enum SourceType {
-  GITHUB
-  WEBSITE
-  DOCUMENT
-  OTHER
 }

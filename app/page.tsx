@@ -1,7 +1,8 @@
-import { useState } from 'react'
+'use client'
+
+import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
-import CategoryTree from '@/components/CategoryTree'
 import ResourceCard from '@/components/ResourceCard'
 import ResourceModal from '@/components/ResourceModal'
 import type { Resource, Category } from '@prisma/client'
@@ -10,27 +11,37 @@ interface ResourceWithCategory extends Resource {
   category?: { name: string }
 }
 
-export default async function HomePage() {
+export default function HomePage() {
   const [selectedResource, setSelectedResource] = useState<ResourceWithCategory | null>(null)
-  const [adminPassword, setAdminPassword] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [latestResources, setLatestResources] = useState<ResourceWithCategory[]>([])
   const [topResources, setTopResources] = useState<ResourceWithCategory[]>([])
 
-  const handleVerifyAdmin = async () => {
-    const response = await fetch('/api/admin/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: adminPassword }),
-    })
-    const data = await response.json()
-    if (data.success) {
-      setIsAdmin(true)
-      localStorage.setItem('admin', 'true')
-    } else {
-      alert('密码错误')
-    }
+  useEffect(() => {
+    setIsAdmin(localStorage.getItem('admin') === 'true')
+    fetchCategories()
+    fetchLatestResources()
+    fetchTopResources()
+  }, [])
+
+  const fetchCategories = async () => {
+    const res = await fetch('/api/categories')
+    const data = await res.json()
+    setCategories(data)
+  }
+
+  const fetchLatestResources = async () => {
+    const res = await fetch('/api/resources')
+    const data = await res.json()
+    setLatestResources(data.slice(0, 6))
+  }
+
+  const fetchTopResources = async () => {
+    const res = await fetch('/api/resources')
+    const data = await res.json()
+    const sorted = data.sort((a: Resource, b: Resource) => b.rating - a.rating).slice(0, 3)
+    setTopResources(sorted)
   }
 
   const handleLogout = () => {
@@ -48,26 +59,9 @@ export default async function HomePage() {
     setSelectedResource({ ...selectedResource, myNotes: notes })
   }
 
-  // 服务端获取数据
-  const getCategories = async (): Promise<Category[]> => {
-    const res = await fetch('http://localhost:3000/api/categories', { cache: 'no-store' })
-    return res.json()
-  }
-
-  const getLatestResources = async (): Promise<ResourceWithCategory[]> => {
-    const res = await fetch('http://localhost:3000/api/resources?limit=6', { cache: 'no-store' })
-    return res.json()
-  }
-
-  const getTopResources = async (): Promise<ResourceWithCategory[]> => {
-    const res = await fetch('http://localhost:3000/api/resources', { cache: 'no-store' })
-    const data = await res.json()
-    return data.sort((a: Resource, b: Resource) => b.rating - a.rating).slice(0, 3)
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header isAdmin={isAdmin || localStorage.getItem('admin') === 'true'} onLogout={handleLogout} />
+      <Header isAdmin={isAdmin} onLogout={handleLogout} />
       
       <Hero />
       
@@ -129,54 +123,11 @@ export default async function HomePage() {
       {selectedResource && (
         <ResourceModal
           resource={selectedResource}
-          isAdmin={isAdmin || localStorage.getItem('admin') === 'true'}
+          isAdmin={isAdmin}
           onClose={() => setSelectedResource(null)}
           onUpdateNotes={handleUpdateNotes}
         />
       )}
-      
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (async () => {
-              const categoriesRes = await fetch('/api/categories');
-              const categories = await categoriesRes.json();
-              window.dispatchEvent(new CustomEvent('categoriesLoaded', { detail: categories }));
-              
-              const latestRes = await fetch('/api/resources');
-              const latestData = await latestRes.json();
-              window.dispatchEvent(new CustomEvent('latestResourcesLoaded', { detail: latestData.slice(0, 6) }));
-              
-              const topRes = await fetch('/api/resources');
-              const topData = await topRes.json();
-              const sortedTop = topData.sort((a, b) => b.rating - a.rating).slice(0, 3);
-              window.dispatchEvent(new CustomEvent('topResourcesLoaded', { detail: sortedTop }));
-            })();
-          `,
-        }}
-      />
-      
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.addEventListener('categoriesLoaded', (e) => {
-              if (window.updateCategories) {
-                window.updateCategories(e.detail);
-              }
-            });
-            window.addEventListener('latestResourcesLoaded', (e) => {
-              if (window.updateLatestResources) {
-                window.updateLatestResources(e.detail);
-              }
-            });
-            window.addEventListener('topResourcesLoaded', (e) => {
-              if (window.updateTopResources) {
-                window.updateTopResources(e.detail);
-              }
-            });
-          `,
-        }}
-      />
     </div>
   )
 }

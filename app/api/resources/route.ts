@@ -1,14 +1,26 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import type { Resource, Difficulty, SourceType } from '@prisma/client'
+
+function parseTags(tags: string): string[] {
+  if (!tags) return []
+  try {
+    return JSON.parse(tags)
+  } catch {
+    return tags.split(',').map(t => t.trim()).filter(t => t)
+  }
+}
+
+function serializeTags(tags: string[]): string {
+  return JSON.stringify(tags)
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   
   const categoryId = searchParams.get('categoryId')
   const search = searchParams.get('search')
-  const difficulty = searchParams.get('difficulty') as Difficulty | null
-  const sourceType = searchParams.get('sourceType') as SourceType | null
+  const difficulty = searchParams.get('difficulty') || null
+  const sourceType = searchParams.get('sourceType') || null
   const tags = searchParams.get('tags')?.split(',') || []
 
   try {
@@ -20,17 +32,21 @@ export async function GET(request: Request) {
         sourceType: sourceType || undefined,
         OR: search
           ? [
-              { name: { contains: search, mode: 'insensitive' } },
-              { description: { contains: search, mode: 'insensitive' } },
+              { name: { contains: search } },
+              { description: { contains: search } },
             ]
           : undefined,
-        tags: tags.length > 0 ? { hasSome: tags } : undefined,
       },
       include: { category: true },
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json(resources)
+    const formattedResources = resources.map(r => ({
+      ...r,
+      tags: parseTags(r.tags),
+    }))
+
+    return NextResponse.json(formattedResources)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch resources' }, { status: 500 })
   }
@@ -46,17 +62,17 @@ export async function POST(request: Request) {
         url,
         description,
         categoryId,
-        tags: tags || [],
-        difficulty: difficulty as Difficulty,
+        tags: serializeTags(tags || []),
+        difficulty: difficulty || 'BEGINNER',
         rating: rating || 0,
-        sourceType: sourceType as SourceType,
+        sourceType: sourceType || 'OTHER',
         myNotes,
         isPublished: isPublished !== undefined ? isPublished : true,
       },
       include: { category: true },
     })
 
-    return NextResponse.json(resource, { status: 201 })
+    return NextResponse.json({ ...resource, tags: parseTags(resource.tags) }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create resource' }, { status: 500 })
   }

@@ -17,9 +17,9 @@ const resources = [
     description: '一个基于 Vibe 的中文编程学习项目，帮助开发者快速上手 Vibe 框架。',
     categoryName: 'Vibe Coding',
     tags: ['Vibe', '学习', '编程'],
-    difficulty: 'BEGINNER' as const,
+    difficulty: 'BEGINNER',
     rating: 5,
-    sourceType: 'GITHUB' as const,
+    sourceType: 'GITHUB',
     myNotes: '这是一个很好的入门项目，适合初学者学习 Vibe 框架。',
   },
   {
@@ -28,9 +28,9 @@ const resources = [
     description: 'DataWhale 社区开发的 Vibe 学习网站，提供系统化的学习路径。',
     categoryName: 'Vibe Coding',
     tags: ['Vibe', '教程', '学习'],
-    difficulty: 'BEGINNER' as const,
+    difficulty: 'BEGINNER',
     rating: 4,
-    sourceType: 'WEBSITE' as const,
+    sourceType: 'WEBSITE',
     myNotes: '内容非常详细，适合系统学习。',
   },
   {
@@ -39,9 +39,9 @@ const resources = [
     description: 'TRAE 官方知识库，包含平台使用指南和最佳实践。',
     categoryName: '官方文档',
     tags: ['TRAE', '官方', '文档'],
-    difficulty: 'INTERMEDIATE' as const,
+    difficulty: 'INTERMEDIATE',
     rating: 5,
-    sourceType: 'DOCUMENT' as const,
+    sourceType: 'DOCUMENT',
     myNotes: '官方文档，内容权威。',
   },
   {
@@ -50,9 +50,9 @@ const resources = [
     description: '一个收集和分享 AI 提示词的项目，帮助用户更好地使用 AI 工具。',
     categoryName: 'AI 提示词',
     tags: ['AI', '提示词', 'ChatGPT'],
-    difficulty: 'BEGINNER' as const,
+    difficulty: 'BEGINNER',
     rating: 4,
-    sourceType: 'GITHUB' as const,
+    sourceType: 'GITHUB',
     myNotes: '非常实用的提示词资源库。',
   },
 ]
@@ -82,10 +82,12 @@ async function main() {
     })
 
     if (!existing) {
+      const { categoryName, ...resourceData } = resource
       await prisma.resource.create({
         data: {
-          ...resource,
+          ...resourceData,
           categoryId: category.id,
+          tags: JSON.stringify(resource.tags),
         },
       })
       console.log(`Created resource: ${resource.name}`)
