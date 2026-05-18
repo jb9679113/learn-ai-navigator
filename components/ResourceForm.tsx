@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
-import type { Resource, Difficulty, SourceType } from '@prisma/client'
+import type { Resource } from '@prisma/client'
+
+type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+type SourceType = 'GITHUB' | 'WEBSITE' | 'DOCUMENT' | 'OTHER'
 
 interface ResourceFormProps {
   categories: { id: string; name: string; parentId: string | null }[]

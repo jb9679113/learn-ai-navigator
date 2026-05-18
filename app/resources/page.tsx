@@ -6,7 +6,10 @@ import CategoryTree from '@/components/CategoryTree'
 import SearchFilter from '@/components/SearchFilter'
 import ResourceCard from '@/components/ResourceCard'
 import ResourceModal from '@/components/ResourceModal'
-import type { Resource, Category, Difficulty, SourceType } from '@prisma/client'
+import type { Resource, Category } from '@prisma/client'
+
+type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+type SourceType = 'GITHUB' | 'WEBSITE' | 'DOCUMENT' | 'OTHER'
 
 interface ResourceWithCategory extends Resource {
   category?: { name: string }
