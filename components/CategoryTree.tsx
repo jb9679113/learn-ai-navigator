@@ -16,6 +16,7 @@ interface CategoryTreeProps {
 
 export default function CategoryTree({ categories, selectedId, onSelect, showAll = false }: CategoryTreeProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const safeCategories: Category[] = Array.isArray(categories) ? categories : []
 
   const toggleExpand = (id: string) => {
     const newExpanded = new Set(expandedIds)
@@ -28,6 +29,7 @@ export default function CategoryTree({ categories, selectedId, onSelect, showAll
   }
 
   const renderTree = (items: Category[], depth = 0) => {
+    if (!Array.isArray(items)) return null
     return items.map((item) => (
       <li key={item.id} className="mb-1">
         <div
@@ -74,7 +76,7 @@ export default function CategoryTree({ categories, selectedId, onSelect, showAll
           <span>全部资源</span>
         </div>
       )}
-      <ul className="mt-1">{renderTree(categories)}</ul>
+      <ul className="mt-1">{renderTree(safeCategories)}</ul>
     </div>
   )
 }

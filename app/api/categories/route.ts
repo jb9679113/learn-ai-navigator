@@ -25,7 +25,8 @@ export async function GET(request: Request) {
     const tree = buildTree(null)
     return NextResponse.json(tree)
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 })
+    console.error('Error fetching categories:', error)
+    return NextResponse.json([], { status: 500 })
   }
 }
 

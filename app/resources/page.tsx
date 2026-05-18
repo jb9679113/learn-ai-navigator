@@ -42,37 +42,58 @@ export default function ResourcesPage() {
   const [sourceType, setSourceType] = useState<SourceType | null>(null)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
-
-  const availableTags = Array.from(new Set(resources.flatMap(r => parseTags(r.tags))))
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    try {
+      setIsAdmin(localStorage.getItem('admin') === 'true')
+    } catch (e) {
+      // localStorage 在 SSR 中不可用
+    }
     fetchCategories()
     fetchResources()
-    setIsAdmin(localStorage.getItem('admin') === 'true')
   }, [])
 
   useEffect(() => {
-    fetchResources()
-  }, [selectedCategoryId, search, difficulty, sourceType, selectedTags])
+    if (!isLoading) {
+      fetchResources()
+    }
+  }, [selectedCategoryId, search, difficulty, sourceType, selectedTags, isLoading])
 
   const fetchCategories = async () => {
-    const res = await fetch('/api/categories')
-    const data = await res.json()
-    setCategories(data)
+    try {
+      const res = await fetch('/api/categories')
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setCategories(Array.isArray(data) ? data : [])
+    } catch (e) {
+      console.error('Error fetching categories:', e)
+      setCategories([])
+    }
   }
 
   const fetchResources = async () => {
-    const params = new URLSearchParams()
-    if (selectedCategoryId) params.set('categoryId', selectedCategoryId)
-    if (search) params.set('search', search)
-    if (difficulty) params.set('difficulty', difficulty)
-    if (sourceType) params.set('sourceType', sourceType)
-    if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
+    try {
+      const params = new URLSearchParams()
+      if (selectedCategoryId) params.set('categoryId', selectedCategoryId)
+      if (search) params.set('search', search)
+      if (difficulty) params.set('difficulty', difficulty)
+      if (sourceType) params.set('sourceType', sourceType)
+      if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
 
-    const res = await fetch(`/api/resources?${params}`)
-    const data = await res.json()
-    setResources(data)
+      const res = await fetch(`/api/resources?${params}`)
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setResources(Array.isArray(data) ? data : [])
+      setIsLoading(false)
+    } catch (e) {
+      console.error('Error fetching resources:', e)
+      setResources([])
+      setIsLoading(false)
+    }
   }
+
+  const availableTags = Array.from(new Set(resources.flatMap(r => parseTags(r.tags))))
 
   const handleTagToggle = (tag: string) => {
     if (selectedTags.includes(tag)) {

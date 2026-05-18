@@ -48,7 +48,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json(formattedResources)
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch resources' }, { status: 500 })
+    console.error('Error fetching resources:', error)
+    return NextResponse.json([], { status: 500 })
   }
 }
 
