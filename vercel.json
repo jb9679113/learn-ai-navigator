@@ -7,8 +7,5 @@
     "app/api/**/*.ts": {
       "maxDuration": 10
     }
-  },
-  "env": {
-    "POSTGRES_PRISMA_URL": "@postgres"
   }
 }
