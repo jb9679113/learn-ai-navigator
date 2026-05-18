@@ -1,0 +1,11 @@
+{
+  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "functions": {
+    "app/api/**/*.ts": {
+      "runtime": "@vercel/node@3.0.1"
+    }
+  },
+  "env": {
+    "POSTGRES_PRISMA_URL": "@postgres-url"
+  }
+}

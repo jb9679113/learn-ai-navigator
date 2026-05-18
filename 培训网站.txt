@@ -1,0 +1,18 @@
+我想做一个网页，帮电商运营自动生成商品的主图和文案。
+运营平时要一个个手动做图写文案，很麻烦。
+我的想法是：他们上传商品信息，系统自动生成一批草稿，
+运营挑选好用的稍微改改就能用。
+
+先做最简单的版本：一个页面，左边填商品信息，
+右边显示生成的结果。能上传图片，能填文字，
+生成后显示主图预览和文案。
+
+帮我把上面的想法扩写一下，整理成一份清晰的业务逻辑文档，
+然后生成一个适合发给 AI IDE（比如 Cursor、Trae）的提示词，
+用来生成单页面应用的原型代码。
+
+
+Vibe coding学习项目：https://github.com/2025Emma/vibe-coding-cn
+easy vibe学习网站：https://datawhalechina.github.io/easy-vibe/zh-cn/
+TRAE官方知识库：https://lcnziv86vkx6.feishu.cn/wiki/XZOSwI51wi5a5okxCF4cAxHSnBh
+AI提示词项目：https://github.com/jb9679113/prompts.chat
