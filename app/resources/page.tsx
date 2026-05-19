@@ -40,7 +40,6 @@ export default function ResourcesPage() {
   const [search, setSearch] = useState('')
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null)
   const [sourceType, setSourceType] = useState<SourceType | null>(null)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -58,7 +57,7 @@ export default function ResourcesPage() {
     if (!isLoading) {
       fetchResources()
     }
-  }, [selectedCategoryId, search, difficulty, sourceType, selectedTags, isLoading])
+  }, [selectedCategoryId, search, difficulty, sourceType, isLoading])
 
   const fetchCategories = async () => {
     try {
@@ -79,7 +78,6 @@ export default function ResourcesPage() {
       if (search) params.set('search', search)
       if (difficulty) params.set('difficulty', difficulty)
       if (sourceType) params.set('sourceType', sourceType)
-      if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
 
       const res = await fetch(`/api/resources?${params}`)
       if (!res.ok) throw new Error('Failed to fetch')
@@ -90,16 +88,6 @@ export default function ResourcesPage() {
       console.error('Error fetching resources:', e)
       setResources([])
       setIsLoading(false)
-    }
-  }
-
-  const availableTags = Array.from(new Set(resources.flatMap(r => parseTags(r.tags))))
-
-  const handleTagToggle = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag))
-    } else {
-      setSelectedTags([...selectedTags, tag])
     }
   }
 
@@ -114,15 +102,15 @@ export default function ResourcesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-primary">
+    <div className="min-h-screen bg-gray-50">
       <Header isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('admin'); setIsAdmin(false) }} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="lg:w-64 flex-shrink-0">
-            <div className="bg-card backdrop-blur-sm border border-color rounded-2xl p-5 sticky top-24">
-              <h3 className="font-semibold text-primary mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm sticky top-24">
+              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
                 分类导航
@@ -144,9 +132,6 @@ export default function ResourcesPage() {
               onDifficultyChange={setDifficulty}
               sourceType={sourceType}
               onSourceTypeChange={setSourceType}
-              availableTags={availableTags}
-              selectedTags={selectedTags}
-              onTagToggle={handleTagToggle}
             />
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -159,7 +144,7 @@ export default function ResourcesPage() {
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-16 text-muted">
+                <div className="col-span-full text-center py-16 text-gray-500">
                   暂无资源
                 </div>
               )}

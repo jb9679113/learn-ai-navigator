@@ -89,42 +89,40 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-primary">
+    <div className="min-h-screen bg-gray-50">
       <Header isAdmin={isAdmin} onLogout={handleLogout} />
       
       <Hero />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <section className="mb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
-            <h2 className="text-2xl font-bold text-primary">热门分类</h2>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-1 h-5 bg-blue-500 rounded-full" />
+            <h2 className="text-xl font-bold text-gray-800">热门分类</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {categories.length > 0 ? (
               categories.slice(0, 5).map((category) => (
                 <div
                   key={category.id}
-                  className="bg-card backdrop-blur-sm border border-color rounded-2xl p-6 hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 cursor-pointer group card-hover"
+                  className="bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
                 >
-                  <div className="text-lg font-semibold text-primary group-hover:text-purple-500 transition-colors mb-2">
-                    {category.name}
-                  </div>
-                  <div className="text-sm text-muted">点击浏览</div>
+                  <div className="text-base font-medium text-gray-800">{category.name}</div>
+                  <div className="text-xs text-gray-400">点击浏览</div>
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-8 text-muted">加载中...</div>
+              <div className="col-span-full text-center py-6 text-gray-400">加载中...</div>
             )}
           </div>
         </section>
         
-        <section className="mb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full" />
-            <h2 className="text-2xl font-bold text-primary">最新添加</h2>
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-1 h-5 bg-blue-500 rounded-full" />
+            <h2 className="text-xl font-bold text-gray-800">最新添加</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {latestResources.length > 0 ? (
               latestResources.map((resource) => (
                 <ResourceCard
@@ -134,17 +132,17 @@ export default function HomePage() {
                 />
               ))
             ) : (
-              <div className="col-span-full text-center py-8 text-muted">加载中...</div>
+              <div className="col-span-full text-center py-6 text-gray-400">加载中...</div>
             )}
           </div>
         </section>
         
         <section>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-6 bg-gradient-to-b from-pink-500 to-orange-500 rounded-full" />
-            <h2 className="text-2xl font-bold text-primary">推荐资源</h2>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-1 h-5 bg-blue-500 rounded-full" />
+            <h2 className="text-xl font-bold text-gray-800">推荐资源</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {topResources.length > 0 ? (
               topResources.map((resource) => (
                 <ResourceCard
@@ -154,7 +152,7 @@ export default function HomePage() {
                 />
               ))
             ) : (
-              <div className="col-span-full text-center py-8 text-muted">加载中...</div>
+              <div className="col-span-full text-center py-6 text-gray-400">加载中...</div>
             )}
           </div>
         </section>

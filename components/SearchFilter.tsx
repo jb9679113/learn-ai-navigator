@@ -8,9 +8,6 @@ interface SearchFilterProps {
   onDifficultyChange: (value: Difficulty | null) => void
   sourceType: SourceType | null
   onSourceTypeChange: (value: SourceType | null) => void
-  availableTags: string[]
-  selectedTags: string[]
-  onTagToggle: (tag: string) => void
 }
 
 const difficulties: { value: Difficulty; label: string }[] = [
@@ -33,12 +30,9 @@ export default function SearchFilter({
   onDifficultyChange,
   sourceType,
   onSourceTypeChange,
-  availableTags,
-  selectedTags,
-  onTagToggle,
 }: SearchFilterProps) {
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-5 mb-6">
+    <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 shadow-sm">
       <div className="flex flex-col lg:flex-row lg:items-center gap-4">
         <div className="flex-1 relative">
           <input
@@ -46,16 +40,18 @@ export default function SearchFilter({
             placeholder="搜索资源名称、描述..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full px-4 py-3 pr-10 bg-gray-900/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-500 transition-all duration-300"
+            className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 placeholder-gray-400 transition-all duration-200"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
         
         <div className="flex flex-wrap gap-3">
           <select
             value={difficulty || ''}
             onChange={(e) => onDifficultyChange(e.target.value as Difficulty || null)}
-            className="px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white transition-all duration-300 cursor-pointer"
+            className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white cursor-pointer transition-all duration-200"
           >
             <option value="">难度</option>
             {difficulties.map((d) => (
@@ -66,7 +62,7 @@ export default function SearchFilter({
           <select
             value={sourceType || ''}
             onChange={(e) => onSourceTypeChange(e.target.value as SourceType || null)}
-            className="px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white transition-all duration-300 cursor-pointer"
+            className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 bg-white cursor-pointer transition-all duration-200"
           >
             <option value="">来源类型</option>
             {sourceTypes.map((s) => (
@@ -75,26 +71,6 @@ export default function SearchFilter({
           </select>
         </div>
       </div>
-      
-      {availableTags.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-700/50">
-          <div className="flex flex-wrap gap-2">
-            {availableTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => onTagToggle(tag)}
-                className={`px-3 py-1.5 rounded-full text-sm transition-all duration-300 ${
-                  selectedTags.includes(tag)
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border border-purple-500/30 shadow-lg shadow-purple-500/20'
-                    : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-gray-300 border border-gray-600/50'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -181,10 +181,6 @@ export default function AdminPage() {
             >
               登录
             </button>
-            
-            <p className="text-center text-gray-400 text-sm">
-              默认密码: admin123
-            </p>
           </div>
         </div>
       </div>
