@@ -24,7 +24,6 @@ export default function HomePage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [latestResources, setLatestResources] = useState<ResourceWithCategory[]>([])
   const [topResources, setTopResources] = useState<ResourceWithCategory[]>([])
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     try {
@@ -90,33 +89,41 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-primary">
       <Header isAdmin={isAdmin} onLogout={handleLogout} />
       
       <Hero />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">热门分类</h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+            <h2 className="text-2xl font-bold text-primary">热门分类</h2>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {categories.length > 0 ? (
               categories.slice(0, 5).map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+                  className="bg-card backdrop-blur-sm border border-color rounded-2xl p-6 hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 cursor-pointer group card-hover"
                 >
-                  <div className="text-lg font-semibold text-gray-800">{category.name}</div>
-                  <div className="text-sm text-gray-500">点击浏览</div>
+                  <div className="text-lg font-semibold text-primary group-hover:text-purple-500 transition-colors mb-2">
+                    {category.name}
+                  </div>
+                  <div className="text-sm text-muted">点击浏览</div>
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-8 text-gray-400">加载中...</div>
+              <div className="col-span-full text-center py-8 text-muted">加载中...</div>
             )}
           </div>
         </section>
         
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">最新添加</h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full" />
+            <h2 className="text-2xl font-bold text-primary">最新添加</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {latestResources.length > 0 ? (
               latestResources.map((resource) => (
@@ -127,13 +134,16 @@ export default function HomePage() {
                 />
               ))
             ) : (
-              <div className="col-span-full text-center py-8 text-gray-400">加载中...</div>
+              <div className="col-span-full text-center py-8 text-muted">加载中...</div>
             )}
           </div>
         </section>
         
         <section>
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">推荐资源</h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-6 bg-gradient-to-b from-pink-500 to-orange-500 rounded-full" />
+            <h2 className="text-2xl font-bold text-primary">推荐资源</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {topResources.length > 0 ? (
               topResources.map((resource) => (
@@ -144,7 +154,7 @@ export default function HomePage() {
                 />
               ))
             ) : (
-              <div className="col-span-full text-center py-8 text-gray-400">加载中...</div>
+              <div className="col-span-full text-center py-8 text-muted">加载中...</div>
             )}
           </div>
         </section>

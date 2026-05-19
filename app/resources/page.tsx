@@ -114,14 +114,19 @@ export default function ResourcesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-primary">
       <Header isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('admin'); setIsAdmin(false) }} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sticky top-24">
-              <h3 className="font-semibold text-gray-800 mb-4">分类导航</h3>
+            <div className="bg-card backdrop-blur-sm border border-color rounded-2xl p-5 sticky top-24">
+              <h3 className="font-semibold text-primary mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                分类导航
+              </h3>
               <CategoryTree
                 categories={categories}
                 selectedId={selectedCategoryId}
@@ -154,7 +159,7 @@ export default function ResourcesPage() {
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-16 text-gray-400">
+                <div className="col-span-full text-center py-16 text-muted">
                   暂无资源
                 </div>
               )}

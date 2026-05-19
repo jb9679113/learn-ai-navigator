@@ -33,17 +33,17 @@ export default function CategoryTree({ categories, selectedId, onSelect, showAll
     return items.map((item) => (
       <li key={item.id} className="mb-1">
         <div
-          className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all duration-300 ${
             selectedId === item.id
-              ? 'bg-blue-100 text-blue-700 font-medium'
-              : 'hover:bg-gray-100 text-gray-700'
+              ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 font-medium border border-purple-500/30'
+              : 'hover:bg-gray-800/50 text-gray-400 hover:text-gray-300'
           }`}
-          style={{ paddingLeft: `${depth * 12 + 8}px` }}
+          style={{ paddingLeft: `${depth * 12 + 12}px` }}
           onClick={() => onSelect(item.id)}
         >
           {item.children && item.children.length > 0 && (
             <span
-              className="expand-icon text-gray-400 hover:text-gray-600"
+              className="expand-icon text-gray-500 hover:text-gray-400 transition-colors"
               onClick={(e) => {
                 e.stopPropagation()
                 toggleExpand(item.id)
@@ -67,8 +67,8 @@ export default function CategoryTree({ categories, selectedId, onSelect, showAll
     <div className="category-tree">
       {showAll && (
         <div
-          className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
-            selectedId === null ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-gray-100 text-gray-700'
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all duration-300 ${
+            selectedId === null ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 font-medium border border-purple-500/30' : 'hover:bg-gray-800/50 text-gray-400 hover:text-gray-300'
           }`}
           onClick={() => onSelect(null)}
         >
@@ -76,7 +76,7 @@ export default function CategoryTree({ categories, selectedId, onSelect, showAll
           <span>全部资源</span>
         </div>
       )}
-      <ul className="mt-1">{renderTree(safeCategories)}</ul>
+      <ul className="mt-2">{renderTree(safeCategories)}</ul>
     </div>
   )
 }
