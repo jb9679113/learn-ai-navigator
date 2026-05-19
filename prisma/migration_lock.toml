@@ -1,0 +1,4 @@
+provider = "postgresql"
+
+[migrations]
+"20260519000000_init" = "done"
