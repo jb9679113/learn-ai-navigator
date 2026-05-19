@@ -1,0 +1,41 @@
+// This is your Prisma schema file for production,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       String     @id @default(cuid())
+  name     String     @unique
+  parentId String?
+  order    Int        @default(0)
+  parent   Category?  @relation("CategoryParent", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[] @relation("CategoryParent")
+  resources Resource[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  description String?
+  categoryId  String
+  tags        String   @default("[]")
+  difficulty  String   @default("BEGINNER")
+  rating      Int      @default(0)
+  sourceType  String   @default("OTHER")
+  myNotes     String?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
