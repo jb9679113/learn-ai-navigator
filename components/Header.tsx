@@ -3,12 +3,19 @@
 import Link from 'next/link'
 import ThemeToggle from './ThemeToggle'
 
+interface User {
+  id: string
+  email: string
+  role: string
+}
+
 interface HeaderProps {
   isAdmin: boolean
   onLogout?: () => void
+  currentUser?: User | null
 }
 
-export default function Header({ isAdmin, onLogout }: HeaderProps) {
+export default function Header({ isAdmin, onLogout, currentUser }: HeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,7 +36,7 @@ export default function Header({ isAdmin, onLogout }: HeaderProps) {
             >
               资源列表
             </Link>
-            {isAdmin ? (
+            {currentUser ? (
               <>
                 <Link
                   href="/admin"
@@ -49,7 +56,7 @@ export default function Header({ isAdmin, onLogout }: HeaderProps) {
                 href="/admin"
                 className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200 text-sm"
               >
-                管理员登录
+                登录
               </Link>
             )}
             <ThemeToggle />

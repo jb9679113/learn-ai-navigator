@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
+import LoginForm from '@/components/LoginForm'
 import ResourceForm from '@/components/ResourceForm'
 import CategoryForm from '@/components/CategoryForm'
 import type { Resource } from '@prisma/client'
@@ -17,6 +18,12 @@ interface Category {
   createdAt: Date
   updatedAt: Date
   children?: Category[]
+}
+
+interface User {
+  id: string
+  email: string
+  role: string
 }
 
 const difficultyLabels: Record<Difficulty, string> = {
@@ -35,9 +42,7 @@ const sourceTypeLabels: Record<SourceType, string> = {
 type TabType = 'resources' | 'categories'
 
 export default function AdminPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [user, setUser] = useState<User | null>(null)
   const [activeTab, setActiveTab] = useState<TabType>('resources')
   const [resources, setResources] = useState<Resource[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -47,28 +52,23 @@ export default function AdminPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
 
   useEffect(() => {
-    if (localStorage.getItem('admin') === 'true') {
-      setIsLoggedIn(true)
-      fetchResources()
-      fetchCategories()
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser))
+        fetchResources()
+        fetchCategories()
+      } catch (e) {
+        localStorage.removeItem('user')
+      }
     }
   }, [])
 
-  const handleLogin = async () => {
-    const response = await fetch('/api/admin/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
-    })
-    const data = await response.json()
-    if (data.success) {
-      setIsLoggedIn(true)
-      localStorage.setItem('admin', 'true')
-      fetchResources()
-      fetchCategories()
-    } else {
-      setError('密码错误，请重试')
-    }
+  const handleLogin = (userData: { id: string; email: string; role: string }) => {
+    setUser(userData)
+    localStorage.setItem('user', JSON.stringify(userData))
+    fetchResources()
+    fetchCategories()
   }
 
   const fetchResources = async () => {
@@ -84,6 +84,7 @@ export default function AdminPage() {
   }
 
   const handleAddResource = async (data: Partial<Resource> & { categoryId: string }) => {
+    if (user?.role !== 'ADMIN') return
     await fetch('/api/resources', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -94,7 +95,7 @@ export default function AdminPage() {
   }
 
   const handleUpdateResource = async (data: Partial<Resource> & { categoryId: string }) => {
-    if (!editingResource) return
+    if (user?.role !== 'ADMIN' || !editingResource) return
     await fetch(`/api/resources/${editingResource.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -106,6 +107,7 @@ export default function AdminPage() {
   }
 
   const handleDeleteResource = async (id: string) => {
+    if (user?.role !== 'ADMIN') return
     if (confirm('确定要删除这个资源吗？')) {
       await fetch(`/api/resources/${id}`, { method: 'DELETE' })
       fetchResources()
@@ -113,6 +115,7 @@ export default function AdminPage() {
   }
 
   const handleAddCategory = async (data: { name: string; parentId: string | null; order: number }) => {
+    if (user?.role !== 'ADMIN') return
     await fetch('/api/categories', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -123,7 +126,7 @@ export default function AdminPage() {
   }
 
   const handleUpdateCategory = async (data: { name: string; parentId: string | null; order: number }) => {
-    if (!editingCategory) return
+    if (user?.role !== 'ADMIN' || !editingCategory) return
     await fetch(`/api/categories/${editingCategory.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -135,6 +138,7 @@ export default function AdminPage() {
   }
 
   const handleDeleteCategory = async (id: string) => {
+    if (user?.role !== 'ADMIN') return
     if (confirm('确定要删除这个分类吗？相关资源也会被删除。')) {
       await fetch(`/api/categories/${id}`, { method: 'DELETE' })
       fetchCategories()
@@ -142,248 +146,199 @@ export default function AdminPage() {
   }
 
   const handleLogout = () => {
-    setIsLoggedIn(false)
-    localStorage.removeItem('admin')
+    setUser(null)
+    localStorage.removeItem('user')
   }
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-2xl font-bold">A</span>
-            </div>
-            <h2 className="text-xl font-bold text-gray-800">管理员登录</h2>
-            <p className="text-gray-500 text-sm">请输入管理员密码</p>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">密码</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="请输入密码"
-              />
-            </div>
-            
-            {error && (
-              <div className="text-red-500 text-sm text-center">{error}</div>
-            )}
-            
-            <button
-              onClick={handleLogin}
-              className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-            >
-              登录
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+  if (!user) {
+    return <LoginForm onLogin={handleLogin} />
   }
 
-  const allCategoriesList = categories.flatMap(cat => {
-    const list: Category[] = [cat]
-    const collectChildren = (children: Category[]) => {
-      for (const child of children) {
-        list.push(child)
-        if (child.children) collectChildren(child.children)
-      }
-    }
-    if (cat.children) collectChildren(cat.children)
-    return list
-  })
+  const isAdmin = user.role === 'ADMIN'
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header isAdmin={true} onLogout={handleLogout} />
+      <Header 
+        isAdmin={isAdmin} 
+        onLogout={handleLogout} 
+        currentUser={user}
+      />
       
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setActiveTab('resources')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'resources'
-                ? 'bg-blue-500 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            资源管理
-          </button>
-          <button
-            onClick={() => setActiveTab('categories')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'categories'
-                ? 'bg-blue-500 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            分类管理
-          </button>
-        </div>
-        
-        {activeTab === 'resources' && (
-          <>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">后台管理</h1>
+              <p className="text-gray-500 text-sm mt-1">
+                当前用户: {user.email} ({user.role === 'ADMIN' ? '管理员' : '普通用户'})
+                {!isAdmin && ' - 您只有查看权限'}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => setShowResourceForm(true)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                  >
+                    添加资源
+                  </button>
+                  <button
+                    onClick={() => setShowCategoryForm(true)}
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+                  >
+                    添加分类
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex border-b border-gray-200 mb-6">
             <button
-              onClick={() => { setShowResourceForm(true); setEditingResource(null) }}
-              className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              onClick={() => setActiveTab('resources')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'resources' 
+                  ? 'border-blue-500 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
             >
-              添加资源
+              资源管理
             </button>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              onClick={() => setActiveTab('categories')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'categories' 
+                  ? 'border-blue-500 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              分类管理
+            </button>
+          </div>
+          
+          {activeTab === 'resources' && (
+            <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">名称</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">分类</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">难度</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">来源</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作</th>
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">名称</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">难度</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">来源</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">评分</th>
+                    {isAdmin && <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">操作</th>}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody>
                   {resources.map((resource) => (
-                    <tr key={resource.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-gray-800 truncate max-w-xs">{resource.name}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-xs">{resource.url}</div>
+                    <tr key={resource.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        <a 
+                          href={resource.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 text-sm"
+                        >
+                          {resource.name}
+                        </a>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {allCategoriesList.find(c => c.id === resource.categoryId)?.name || '未分类'}
+                      <td className="py-3 px-4 text-sm text-gray-600">
+                        {difficultyLabels[resource.difficulty as Difficulty]}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          resource.difficulty === 'BEGINNER' ? 'bg-green-100 text-green-700' :
-                          resource.difficulty === 'INTERMEDIATE' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          {difficultyLabels[resource.difficulty as Difficulty]}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
+                      <td className="py-3 px-4 text-sm text-gray-600">
                         {sourceTypeLabels[resource.sourceType as SourceType]}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => { setEditingResource(resource); setShowResourceForm(true) }}
-                            className="px-3 py-1 text-sm bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
-                          >
-                            编辑
-                          </button>
-                          <button
-                            onClick={() => handleDeleteResource(resource.id)}
-                            className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                          >
-                            删除
-                          </button>
-                        </div>
-                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-600">{resource.rating}</td>
+                      {isAdmin && (
+                        <td className="py-3 px-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingResource(resource)
+                                setShowResourceForm(true)
+                              }}
+                              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                              编辑
+                            </button>
+                            <button
+                              onClick={() => handleDeleteResource(resource.id)}
+                              className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                            >
+                              删除
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
-              
-              {resources.length === 0 && (
-                <div className="text-center py-16 text-gray-400">暂无资源</div>
-              )}
             </div>
-          </>
-        )}
-        
-        {activeTab === 'categories' && (
-          <>
-            <button
-              onClick={() => { setShowCategoryForm(true); setEditingCategory(null) }}
-              className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              添加分类
-            </button>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">名称</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">上级分类</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">排序</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {allCategoriesList.map((category) => (
-                    <tr key={category.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-800">{category.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {category.parentId ? allCategoriesList.find(c => c.id === category.parentId)?.name : '-'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{category.order}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => { setEditingCategory(category); setShowCategoryForm(true) }}
-                            className="px-3 py-1 text-sm bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
-                          >
-                            编辑
-                          </button>
-                          <button
-                            onClick={() => handleDeleteCategory(category.id)}
-                            className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                          >
-                            删除
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              
-              {allCategoriesList.length === 0 && (
-                <div className="text-center py-16 text-gray-400">暂无分类</div>
-              )}
+          )}
+          
+          {activeTab === 'categories' && (
+            <div className="space-y-3">
+              {categories.map((category) => (
+                <div 
+                  key={category.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div>
+                    <div className="font-medium text-gray-800">{category.name}</div>
+                    <div className="text-sm text-gray-500">
+                      {category.parentId ? '子分类' : '主分类'}
+                    </div>
+                  </div>
+                  {isAdmin && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingCategory(category)
+                          setShowCategoryForm(true)
+                        }}
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        编辑
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCategory(category.id)}
+                        className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                      >
+                        删除
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          </>
-        )}
-        
-        {showResourceForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                {editingResource ? '编辑资源' : '添加资源'}
-              </h2>
-              <ResourceForm
-                categories={allCategoriesList}
-                resource={editingResource}
-                onSubmit={editingResource ? handleUpdateResource : handleAddResource}
-                onCancel={() => { setShowResourceForm(false); setEditingResource(null) }}
-              />
-            </div>
-          </div>
-        )}
-        
-        {showCategoryForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                {editingCategory ? '编辑分类' : '添加分类'}
-              </h2>
-              <CategoryForm
-                categories={categories}
-                category={editingCategory}
-                onSubmit={editingCategory ? handleUpdateCategory : handleAddCategory}
-                onCancel={() => { setShowCategoryForm(false); setEditingCategory(null) }}
-              />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
+      
+      {showResourceForm && (
+        <ResourceForm
+          resource={editingResource}
+          categories={categories}
+          onSubmit={editingResource ? handleUpdateResource : handleAddResource}
+          onCancel={() => {
+            setShowResourceForm(false)
+            setEditingResource(null)
+          }}
+        />
+      )}
+      
+      {showCategoryForm && (
+        <CategoryForm
+          category={editingCategory}
+          categories={categories}
+          onSubmit={editingCategory ? handleUpdateCategory : handleAddCategory}
+          onCancel={() => {
+            setShowCategoryForm(false)
+            setEditingCategory(null)
+          }}
+        />
+      )}
     </div>
   )
 }

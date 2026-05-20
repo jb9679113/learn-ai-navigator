@@ -18,16 +18,25 @@ interface ResourceWithCategory extends Resource {
   category?: { name: string }
 }
 
+interface User {
+  id: string
+  email: string
+  role: string
+}
+
 export default function HomePage() {
   const [selectedResource, setSelectedResource] = useState<ResourceWithCategory | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [latestResources, setLatestResources] = useState<ResourceWithCategory[]>([])
   const [topResources, setTopResources] = useState<ResourceWithCategory[]>([])
 
   useEffect(() => {
     try {
-      setIsAdmin(localStorage.getItem('admin') === 'true')
+      const savedUser = localStorage.getItem('user')
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser))
+      }
     } catch (e) {
       // localStorage 在服务端不可用，忽略
     }
@@ -74,8 +83,8 @@ export default function HomePage() {
   }
 
   const handleLogout = () => {
-    setIsAdmin(false)
-    localStorage.removeItem('admin')
+    setCurrentUser(null)
+    localStorage.removeItem('user')
   }
 
   const handleUpdateNotes = async (notes: string) => {
@@ -90,7 +99,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header isAdmin={isAdmin} onLogout={handleLogout} />
+      <Header 
+        isAdmin={currentUser?.role === 'ADMIN'} 
+        onLogout={handleLogout}
+        currentUser={currentUser}
+      />
       
       <Hero />
       
@@ -161,7 +174,7 @@ export default function HomePage() {
       {selectedResource && (
         <ResourceModal
           resource={selectedResource}
-          isAdmin={isAdmin}
+          isAdmin={currentUser?.role === 'ADMIN'}
           onClose={() => setSelectedResource(null)}
           onUpdateNotes={handleUpdateNotes}
         />

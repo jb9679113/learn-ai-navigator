@@ -22,6 +22,12 @@ interface ResourceWithCategory extends Resource {
   category?: { name: string }
 }
 
+interface User {
+  id: string
+  email: string
+  role: string
+}
+
 function parseTags(tags: string | string[]): string[] {
   if (!tags) return []
   if (Array.isArray(tags)) return tags
@@ -40,12 +46,15 @@ export default function ResourcesPage() {
   const [search, setSearch] = useState('')
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null)
   const [sourceType, setSourceType] = useState<SourceType | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     try {
-      setIsAdmin(localStorage.getItem('admin') === 'true')
+      const savedUser = localStorage.getItem('user')
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser))
+      }
     } catch (e) {
       // localStorage 在 SSR 中不可用
     }
@@ -91,6 +100,11 @@ export default function ResourcesPage() {
     }
   }
 
+  const handleLogout = () => {
+    setCurrentUser(null)
+    localStorage.removeItem('user')
+  }
+
   const handleUpdateNotes = async (notes: string) => {
     if (!selectedResource) return
     await fetch(`/api/resources/${selectedResource.id}`, {
@@ -103,7 +117,11 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('admin'); setIsAdmin(false) }} />
+      <Header 
+        isAdmin={currentUser?.role === 'ADMIN'} 
+        onLogout={handleLogout}
+        currentUser={currentUser}
+      />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
@@ -156,7 +174,7 @@ export default function ResourcesPage() {
       {selectedResource && (
         <ResourceModal
           resource={selectedResource}
-          isAdmin={isAdmin}
+          isAdmin={currentUser?.role === 'ADMIN'}
           onClose={() => setSelectedResource(null)}
           onUpdateNotes={handleUpdateNotes}
         />
