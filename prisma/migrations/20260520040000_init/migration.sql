@@ -6,7 +6,6 @@ CREATE TABLE "Category" (
     "order" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "Category_name_key" UNIQUE ("name"),
     CONSTRAINT "Category_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Category"("id") ON DELETE CASCADE
@@ -27,11 +26,18 @@ CREATE TABLE "Resource" (
     "isPublished" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-
     CONSTRAINT "Resource_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "Resource_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE CASCADE
 );
 
--- Create indexes
-CREATE INDEX "Resource_categoryId_idx" ON "Resource"("categoryId");
-CREATE INDEX "Category_parentId_idx" ON "Category"("parentId");
+-- Create User table
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'USER',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "User_email_key" UNIQUE ("email")
+);
