@@ -1,4 +1,7 @@
--- Create User table
+-- 清理失败的迁移记录
+DELETE FROM "_prisma_migrations" WHERE migration_name = '20260520040000_init';
+
+-- 创建 User 表
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
