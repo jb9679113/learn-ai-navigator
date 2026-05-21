@@ -11,7 +11,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
-    "vercel-build": "cp prisma/schema.prod.prisma prisma/schema.prisma && prisma generate && prisma migrate deploy && next build"
+    "vercel-build": "cp prisma/schema.prod.prisma prisma/schema.prisma && prisma generate && next build"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",
