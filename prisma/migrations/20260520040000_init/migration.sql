@@ -1,2 +1,0 @@
--- This migration is empty because tables already exist in production database
--- User table will be created in the next migration
